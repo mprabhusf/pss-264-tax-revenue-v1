@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-brand: "Source Serif 4", ui-serif, Georgia, "Times New Roman", serif;
+  --color-portal-ochre: #965f0b;
+  --color-portal-ochre-hover: #7a4d09;
+  --color-portal-brown: #5d4037;
+  --color-portal-peach: #fff0e6;
+  --color-portal-peach-muted: #fdf2f0;
+  --color-portal-link: #1d4ed8;
+  --shadow-portal-card: 0 1px 3px 0 rgb(28 25 23 / 0.06),
+    0 1px 2px -1px rgb(28 25 23 / 0.05);
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  @apply bg-stone-100 text-stone-900 antialiased;
+}
