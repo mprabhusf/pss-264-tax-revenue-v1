@@ -4,13 +4,8 @@ import {
   MenuItem,
   MenuItems,
 } from "@headlessui/react";
-import {
-  Bell,
-  Building2,
-  ChevronDown,
-  Menu,
-  Search,
-} from "lucide-react";
+import { Bell, ChevronDown, Menu, Search } from "lucide-react";
+import { useBreadcrumb } from "@/context/BreadcrumbContext";
 import { TAXPAYER } from "@/data/portal";
 import { labelForNav, PRIMARY_NAV, type NavKey } from "./navConfig";
 
@@ -26,6 +21,7 @@ export function SiteHeader({
   onOpenMobileNav,
 }: SiteHeaderProps) {
   const currentLabel = labelForNav(active);
+  const { secondaryLabel, clearSecondary } = useBreadcrumb();
 
   return (
     <header className="sticky top-0 z-30 border-b border-stone-200/90 bg-white shadow-[0_1px_0_rgb(0_0_0/0.03)]">
@@ -41,20 +37,17 @@ export function SiteHeader({
         </button>
 
         <div className="flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3">
-          <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-amber-200/80 text-portal-ochre shadow-sm ring-1 ring-amber-200/60"
-            aria-hidden
-          >
-            <Building2 className="h-5 w-5" strokeWidth={2} />
-          </div>
-          <div className="min-w-0 leading-tight">
-            <p className="font-brand text-lg font-semibold tracking-tight text-portal-brown sm:text-xl">
-              APS 264
-            </p>
-            <p className="hidden text-[11px] font-medium text-stone-500 sm:block sm:text-xs">
-              Self-Service Taxpayer Portal
-            </p>
-          </div>
+          <img
+            src="/portal-logo.png"
+            alt=""
+            width={40}
+            height={40}
+            className="h-10 w-10 shrink-0 object-contain"
+            decoding="async"
+          />
+          <p className="min-w-0 truncate font-sans text-lg font-semibold tracking-tight text-portal-brown sm:text-xl">
+            Taxpayer Portal
+          </p>
         </div>
 
         <div className="mx-auto hidden min-w-0 max-w-md flex-1 px-4 md:block">
@@ -201,24 +194,39 @@ export function SiteHeader({
         </nav>
       </div>
 
-      {/* Breadcrumbs — blue parent link + current page (reference pattern) */}
-      <div className="border-t border-stone-100 bg-stone-50/90">
-        <div className="mx-auto max-w-7xl px-4 py-2.5 text-sm sm:px-6 lg:px-8">
-          <nav className="text-portal-link" aria-label="Breadcrumb">
-            <button
-              type="button"
-              onClick={() => onNavigate("dashboard")}
-              className="font-medium hover:underline"
-            >
-              Portal
-            </button>
-            <span className="mx-2 text-stone-400" aria-hidden>
-              ›
-            </span>
-            <span className="font-medium text-stone-700">{currentLabel}</span>
-          </nav>
+      {/* Breadcrumbs only below primary tabs (secondary navigation depth) */}
+      {secondaryLabel ? (
+        <div className="border-t border-stone-100 bg-stone-50/90">
+          <div className="mx-auto max-w-7xl px-4 py-2.5 text-sm sm:px-6 lg:px-8">
+            <nav className="text-portal-link" aria-label="Breadcrumb">
+              <button
+                type="button"
+                onClick={() => {
+                  onNavigate("dashboard");
+                  clearSecondary();
+                }}
+                className="font-medium hover:underline"
+              >
+                Portal
+              </button>
+              <span className="mx-2 text-stone-400" aria-hidden>
+                ›
+              </span>
+              <button
+                type="button"
+                onClick={() => clearSecondary()}
+                className="font-medium hover:underline"
+              >
+                {currentLabel}
+              </button>
+              <span className="mx-2 text-stone-400" aria-hidden>
+                ›
+              </span>
+              <span className="font-medium text-stone-700">{secondaryLabel}</span>
+            </nav>
+          </div>
         </div>
-      </div>
+      ) : null}
     </header>
   );
 }

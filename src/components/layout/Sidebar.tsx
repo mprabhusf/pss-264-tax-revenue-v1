@@ -1,5 +1,4 @@
 import {
-  Building2,
   CreditCard,
   FileText,
   Inbox,
@@ -30,15 +29,17 @@ export function Sidebar({ active, onNavigate, className = "" }: SidebarProps) {
       className={`flex h-full w-full flex-col bg-white ${className}`}
     >
       <div className="flex items-center gap-2.5 border-b border-stone-100 px-4 py-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-amber-200/80 text-portal-ochre ring-1 ring-amber-200/60">
-          <Building2 className="h-5 w-5" />
-        </div>
-        <div className="min-w-0">
-          <p className="font-brand text-base font-semibold text-portal-brown">
-            APS 264
-          </p>
-          <p className="truncate text-xs text-stone-500">Navigate</p>
-        </div>
+        <img
+          src="/portal-logo.png"
+          alt=""
+          width={40}
+          height={40}
+          className="h-10 w-10 shrink-0 object-contain"
+          decoding="async"
+        />
+        <p className="min-w-0 truncate font-sans text-base font-semibold text-portal-brown">
+          Taxpayer Portal
+        </p>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-stone-400">

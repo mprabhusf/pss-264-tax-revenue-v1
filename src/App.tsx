@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AgentforceAssistant } from "@/components/agentforce/AgentforceAssistant";
 import { AppShell } from "@/components/layout/AppShell";
 import type { NavKey } from "@/components/layout/navConfig";
+import { BreadcrumbProvider } from "@/context/BreadcrumbContext";
 import { DashboardView } from "@/views/DashboardView";
 import { HouseholdProfileView } from "@/views/HouseholdProfileView";
 import { NoticesView } from "@/views/NoticesView";
@@ -25,11 +26,11 @@ export default function App() {
     );
 
   return (
-    <>
+    <BreadcrumbProvider navKey={nav}>
       <AppShell active={nav} onNavigate={setNav}>
         {content}
       </AppShell>
       <AgentforceAssistant />
-    </>
+    </BreadcrumbProvider>
   );
 }

@@ -1,7 +1,7 @@
 /** Shared mock data for Taxpayer 360 / Agentforce grounding */
 
 export const TAXPAYER = {
-  name: "Alex Thompson",
+  name: "Carlos Lopez",
   tinMasked: "XXX-XX-1234",
 } as const;
 
@@ -33,6 +33,6 @@ export const PAYMENT_HISTORY = [
 ];
 
 export const INCOME_ON_FILE = [
-  { form: "W-2", employer: "Thompson Analytics Ltd", amount: "£75,000" },
+  { form: "W-2", employer: "Lopez Analytics Ltd", amount: "£75,000" },
   { form: "1099-INT", payer: "Global Savings Bank", amount: "£500" },
 ];

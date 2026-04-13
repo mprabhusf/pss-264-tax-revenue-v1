@@ -2,12 +2,12 @@ import { BadgeCheck } from "lucide-react";
 
 const dependents = [
   {
-    name: "Sarah Thompson",
+    name: "Sarah Lopez",
     verifiedSince: "2018",
     relationship: "Dependent",
   },
   {
-    name: "Thomas Thompson",
+    name: "Thomas Lopez",
     verifiedSince: "2021",
     relationship: "Dependent",
   },

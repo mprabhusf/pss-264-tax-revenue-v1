@@ -9,6 +9,6 @@ The core philosophy is "Taxpayer 360"—unifying siloed data (Mainframes, SAP, S
 
 Tech stack: React, Tailwind CSS, Lucide-React icons, and Headless UI for components.
 
-Design language: Modern, clean, trustworthy — "Plus Jakarta Sans" for UI, "Source Serif 4" for product wordmark; high whitespace; warm peach/cream surfaces (#fff0e6, #fdf2f0); ochre/brown primary actions (~#965f0b, ~#5d4037); blue (#1d4ed8) for links and progress states (align with National Benefits reference screens).
+Design language: Modern, clean, trustworthy — "Plus Jakarta Sans" for UI and portal title; high whitespace; warm peach/cream surfaces (#fff0e6, #fdf2f0); ochre/brown primary actions (~#965f0b, ~#5d4037); blue (#1d4ed8) for links and progress states (align with National Benefits reference screens).
 
 Key feature: "Agentforce" AI Assistant integration for factual data retrieval (grounding).
