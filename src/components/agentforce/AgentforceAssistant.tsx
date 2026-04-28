@@ -1,4 +1,9 @@
-import { Transition } from "@headlessui/react";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
 import { Bot, Send, Sparkles, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getAssistantReply } from "./getAssistantReply";
@@ -74,122 +79,105 @@ export function AgentforceAssistant() {
         <Bot className="h-7 w-7" strokeWidth={1.75} />
       </button>
 
-      <Transition show={open}>
-        <div className="fixed inset-0 z-40 sm:inset-auto sm:bottom-6 sm:right-6 sm:left-auto sm:top-auto">
-          <Transition
-            enter="transition ease-out duration-200"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition ease-in duration-150"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
+      <Dialog open={open} onClose={() => setOpen(false)} className="relative z-50">
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 bg-stone-900/25 transition duration-200 ease-out data-closed:opacity-0"
+        />
+        <div className="fixed inset-0 flex w-screen items-end justify-center sm:items-end sm:justify-end sm:p-6">
+          <DialogPanel
+            transition
+            className="flex max-h-[85vh] w-full max-w-full flex-col rounded-t-2xl border border-stone-200 bg-white shadow-2xl transition duration-200 ease-out data-closed:translate-y-4 data-closed:opacity-0 sm:mb-0 sm:max-h-[min(70vh,32rem)] sm:w-[min(100vw-3rem,26rem)] sm:rounded-2xl"
           >
-            <button
-              type="button"
-              className="fixed inset-0 bg-stone-900/25 sm:hidden"
-              aria-label="Close assistant"
-              onClick={() => setOpen(false)}
-            />
-          </Transition>
-          <Transition
-            enter="transition ease-out duration-200"
-            enterFrom="translate-y-4 opacity-0 sm:translate-y-4 sm:scale-95"
-            enterTo="translate-y-0 opacity-100 sm:scale-100"
-            leave="transition ease-in duration-150"
-            leaveFrom="translate-y-0 opacity-100 sm:scale-100"
-            leaveTo="translate-y-4 opacity-0 sm:translate-y-4 sm:scale-95"
-          >
-            <div className="fixed inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl border border-stone-200 bg-white shadow-2xl sm:absolute sm:inset-auto sm:h-[min(32rem,70vh)] sm:w-[min(100vw-3rem,26rem)] sm:rounded-2xl">
-              <div className="flex items-center justify-between border-b border-stone-100 bg-portal-peach-muted/50 px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-portal-ochre ring-1 ring-amber-200/80">
-                    <Sparkles className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-portal-brown">
-                      Agentforce
-                    </p>
-                    <p className="text-xs text-stone-500">Grounded assistant</p>
+            <div className="flex items-center justify-between border-b border-stone-100 bg-portal-peach-muted/50 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-portal-ochre ring-1 ring-amber-200/80">
+                  <Sparkles className="h-5 w-5" />
+                </span>
+                <div>
+                  <DialogTitle className="text-sm font-semibold text-portal-brown">
+                    Agentforce
+                  </DialogTitle>
+                  <p className="text-xs text-stone-500">Grounded assistant</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded-lg p-2 text-stone-500 hover:bg-stone-100"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div
+              ref={listRef}
+              className="flex-1 space-y-3 overflow-y-auto px-4 py-3"
+            >
+              {messages.map((m) => (
+                <div
+                  key={m.id}
+                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[90%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                      m.role === "user"
+                        ? "bg-portal-ochre text-white"
+                        : "bg-stone-100 text-stone-800"
+                    }`}
+                  >
+                    {m.role === "assistant" ? (
+                      <p className="whitespace-pre-wrap">
+                        {formatAssistantText(m.text)}
+                      </p>
+                    ) : (
+                      m.text
+                    )}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="rounded-lg p-2 text-stone-500 hover:bg-stone-100"
-                  aria-label="Close"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+              ))}
+            </div>
 
-              <div
-                ref={listRef}
-                className="flex-1 space-y-3 overflow-y-auto px-4 py-3"
-              >
-                {messages.map((m) => (
-                  <div
-                    key={m.id}
-                    className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+            <div className="border-t border-stone-100 bg-portal-peach-muted/30 px-3 pb-2 pt-2">
+              <div className="mb-2 flex flex-wrap gap-2">
+                {SUGGESTED_CHIPS.map((chip) => (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => send(chip)}
+                    className="rounded-full bg-white px-3 py-1 text-xs font-medium text-portal-brown ring-1 ring-stone-200/80 transition hover:bg-portal-peach"
                   >
-                    <div
-                      className={`max-w-[90%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
-                        m.role === "user"
-                          ? "bg-portal-ochre text-white"
-                          : "bg-stone-100 text-stone-800"
-                      }`}
-                    >
-                      {m.role === "assistant" ? (
-                        <p className="whitespace-pre-wrap">
-                          {formatAssistantText(m.text)}
-                        </p>
-                      ) : (
-                        m.text
-                      )}
-                    </div>
-                  </div>
+                    {chip}
+                  </button>
                 ))}
               </div>
-
-              <div className="border-t border-stone-100 bg-portal-peach-muted/30 px-3 pb-2 pt-2">
-                <div className="mb-2 flex flex-wrap gap-2">
-                  {SUGGESTED_CHIPS.map((chip) => (
-                    <button
-                      key={chip}
-                      type="button"
-                      onClick={() => send(chip)}
-                      className="rounded-full bg-white px-3 py-1 text-xs font-medium text-portal-brown ring-1 ring-stone-200/80 transition hover:bg-portal-peach"
-                    >
-                      {chip}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") send(input);
-                    }}
-                    placeholder="Ask a question…"
-                    className="min-h-10 flex-1 rounded-xl border border-stone-200 bg-stone-50 px-3 text-sm outline-none ring-portal-link/20 focus:border-portal-link focus:bg-white focus:ring-2"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => send(input)}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-portal-ochre text-white hover:bg-portal-ochre-hover"
-                    aria-label="Send"
-                  >
-                    <Send className="h-4 w-4" />
-                  </button>
-                </div>
-                <p className="mt-2 text-center text-[10px] font-medium uppercase tracking-wider text-stone-400">
-                  Powered by Agentforce
-                </p>
+              <div className="flex gap-2">
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") send(input);
+                  }}
+                  placeholder="Ask a question…"
+                  className="min-h-10 flex-1 rounded-xl border border-stone-200 bg-stone-50 px-3 text-sm outline-none ring-portal-link/20 focus:border-portal-link focus:bg-white focus:ring-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => send(input)}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-portal-ochre text-white hover:bg-portal-ochre-hover"
+                  aria-label="Send"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
               </div>
+              <p className="mt-2 text-center text-[10px] font-medium uppercase tracking-wider text-stone-400">
+                Powered by Agentforce
+              </p>
             </div>
-          </Transition>
+          </DialogPanel>
         </div>
-      </Transition>
+      </Dialog>
     </>
   );
 }
