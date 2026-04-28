@@ -8,14 +8,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** Set when running `npm run build:github-pages` — publishes static files to /docs for GitHub Pages. */
 const githubPages = process.env.GITHUB_PAGES === "true";
+
+/** GitHub project Pages are served at /repository-name/; relative `./` breaks when the URL has no trailing slash. */
+function defaultGithubPagesBase(): string {
+  const repo = process.env.GITHUB_REPOSITORY?.split("/")[1];
+  if (repo) return `/${repo}/`;
+  return "/pss-264-tax-revenue-v1/";
+}
+
 /**
- * Pages asset prefix. Default `./` so JS/CSS resolve under whatever path GitHub
- * Enterprise serves (e.g. /pages/org/repo/). Override if you use a fixed path:
- * `VITE_PAGES_BASE=/pss-264-tax-revenue-v1/ npm run build:github-pages`
+ * Asset prefix for GitHub Pages. Override for a fork or custom path:
+ * `VITE_PAGES_BASE=/my-repo/ npm run build:github-pages`
  */
 const pagesBase =
   process.env.VITE_PAGES_BASE?.replace(/\/?$/, "/") ??
-  (githubPages ? "./" : "/");
+  (githubPages ? defaultGithubPagesBase() : "/");
 
 export default defineConfig({
   base: githubPages ? pagesBase : "/",
