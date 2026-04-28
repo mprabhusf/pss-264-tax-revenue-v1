@@ -1,6 +1,7 @@
 export type NavKey =
-  | "dashboard"
+  | "home"
   | "household"
+  | "income"
   | "taxes"
   | "payments"
   | "notices";
@@ -10,8 +11,9 @@ export const PRIMARY_NAV: {
   label: string;
   shortLabel: string;
 }[] = [
-  { key: "dashboard", label: "Dashboard", shortLabel: "Dashboard" },
-  { key: "household", label: "Household & Profile", shortLabel: "Household" },
+  { key: "home", label: "Home", shortLabel: "Home" },
+  { key: "household", label: "Profile & Household", shortLabel: "Profile" },
+  { key: "income", label: "Income", shortLabel: "Income" },
   { key: "taxes", label: "Taxes & Filing", shortLabel: "Taxes" },
   { key: "payments", label: "Payments & Ledger", shortLabel: "Payments" },
   { key: "notices", label: "Notices Center", shortLabel: "Notices" },

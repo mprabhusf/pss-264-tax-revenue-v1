@@ -4,13 +4,15 @@ import {
   Inbox,
   LayoutDashboard,
   Users,
+  Wallet,
 } from "lucide-react";
 import { TAXPAYER } from "@/data/portal";
 import { PRIMARY_NAV, type NavKey } from "./navConfig";
 
 const ICONS = {
-  dashboard: LayoutDashboard,
+  home: LayoutDashboard,
   household: Users,
+  income: Wallet,
   taxes: FileText,
   payments: CreditCard,
   notices: Inbox,
@@ -76,7 +78,7 @@ export function Sidebar({ active, onNavigate, className = "" }: SidebarProps) {
             {TAXPAYER.name}
           </p>
           <p className="truncate text-xs text-stone-500">
-            TIN: {TAXPAYER.tinMasked}
+            SSN: {TAXPAYER.tinMasked}
           </p>
         </div>
       </div>

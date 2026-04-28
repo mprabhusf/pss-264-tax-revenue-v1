@@ -1,6 +1,5 @@
 import {
   APPROVED_TAX_CREDITS,
-  DIRECT_DEPOSIT_ACCOUNT,
   HOUSEHOLD_DEPENDENTS,
   HOUSEHOLD_SPOUSE,
   INCOME_ON_FILE,
@@ -10,6 +9,7 @@ import {
   PROFILE_HEALTH_CHECK,
   TAXPAYER,
 } from "@/data/portal";
+import { useTaxpayer360 } from "@/context/Taxpayer360Context";
 import {
   BadgeCheck,
   Bot,
@@ -90,17 +90,19 @@ function SectionCard({
 }
 
 export function HouseholdProfileView() {
+  const { linkedBankAccounts } = useTaxpayer360();
   const w2And1099 = INCOME_ON_FILE;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <div>
         <h1 className="text-2xl font-semibold text-portal-brown">
-          Household & Profile
+          Profile & Household
         </h1>
         <p className="mt-1 text-sm text-stone-600">
-          Your core record, household structure, income on file, PAYE codes, and
-          financial settings — unified for Taxpayer 360.
+          Your core record, household structure, income on file, federal and
+          California withholding elections, and financial settings — unified for
+          Taxpayer 360.
         </p>
       </div>
 
@@ -141,7 +143,7 @@ export function HouseholdProfileView() {
       >
         <dl className="divide-y divide-stone-100">
           <DefinitionRow label="Legal name">{TAXPAYER.name}</DefinitionRow>
-          <DefinitionRow label="Primary identifier (TIN/SSN)">
+          <DefinitionRow label="SSN">
             {TAXPAYER.tinMasked}
           </DefinitionRow>
           <DefinitionRow label="Email">{PROFILE_CONTACT.email}</DefinitionRow>
@@ -215,6 +217,17 @@ export function HouseholdProfileView() {
                   <p className="text-sm text-stone-500">
                     {d.relationship} · Claimed since {d.claimedSince}
                   </p>
+                  <p className="mt-2">
+                    {d.consistencyWithFiling ? (
+                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-900 ring-1 ring-emerald-200/70">
+                        Consistent with filings
+                      </span>
+                    ) : (
+                      <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-900 ring-1 ring-amber-200/70">
+                        Review suggested
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <VerificationBadge status={d.verificationStatus} />
               </li>
@@ -226,7 +239,7 @@ export function HouseholdProfileView() {
       <SectionCard
         icon={Briefcase}
         title="Employment & Income Data"
-        description="Real-time summary of information returns: W-2 (employer) and 1099 (gig, interest, and other). PAYE tax codes show how pay is taxed at source."
+        description="Real-time summary of information returns: W-2 (employer) and 1099 (gig, interest, and other). Withholding elections (Form W-4 and California DE-4) show how pay is taxed at source."
       >
         <div className="overflow-hidden rounded-xl border border-stone-100">
           <table className="w-full text-left text-sm">
@@ -263,7 +276,7 @@ export function HouseholdProfileView() {
           <div className="flex flex-wrap items-center gap-2">
             <Building2 className="h-5 w-5 text-portal-brown" strokeWidth={1.75} />
             <h3 className="text-sm font-semibold text-portal-brown">
-              Active PAYE tax codes
+              Active withholding elections
             </h3>
           </div>
           <ul className="mt-4 space-y-4">
@@ -289,10 +302,10 @@ export function HouseholdProfileView() {
             <Bot className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" aria-hidden />
             <p>
               <span className="font-semibold text-portal-brown">Agentforce</span>{" "}
-              can explain how code <span className="font-mono">1257L</span> and
-              your allowances affect monthly take-home. Try:{" "}
+              can explain how your <strong>W-4</strong> and{" "}
+              <strong>DE-4</strong> settings affect take-home pay. Try:{" "}
               <span className="font-medium text-stone-900">
-                &quot;How does my PAYE code affect my pay?&quot;
+                &quot;How does my withholding affect my pay?&quot;
               </span>
             </p>
           </div>
@@ -334,25 +347,45 @@ export function HouseholdProfileView() {
               Direct deposit bank account
             </h3>
           </div>
-          <div className="mt-4 rounded-xl border border-stone-100 bg-stone-50/50 px-4 py-4">
-            <p className="font-medium text-stone-900">
-              {DIRECT_DEPOSIT_ACCOUNT.institution}
-            </p>
-            <p className="mt-2 font-mono text-sm text-stone-700">
-              Sort code {DIRECT_DEPOSIT_ACCOUNT.sortCodeMasked} · Account ending{" "}
-              {DIRECT_DEPOSIT_ACCOUNT.accountLast4}
-            </p>
-            {DIRECT_DEPOSIT_ACCOUNT.verified ? (
-              <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-800">
-                <BadgeCheck className="h-4 w-4" />
-                Verified for payouts · {DIRECT_DEPOSIT_ACCOUNT.verifiedAt}
-              </p>
-            ) : (
-              <p className="mt-3 text-sm text-amber-800">
-                Verification required before the next deposit.
-              </p>
-            )}
-          </div>
+          <ul className="mt-4 space-y-3">
+            {linkedBankAccounts.map((acct) => (
+              <li
+                key={acct.id}
+                className={`rounded-xl border bg-stone-50/50 px-4 py-4 ${
+                  acct.isRefundDestination
+                    ? "border-portal-ochre/50 ring-1 ring-portal-ochre/25"
+                    : "border-stone-100"
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-medium text-stone-900">{acct.displayLabel}</p>
+                  {acct.isRefundDestination ? (
+                    <span className="rounded-full bg-portal-ochre/15 px-2.5 py-0.5 text-xs font-semibold text-portal-brown">
+                      Refund destination
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-600">
+                      Linked account
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-sm text-stone-600">{acct.institution}</p>
+                <p className="mt-2 font-mono text-sm text-stone-700">
+                  Routing {acct.sortCodeMasked} · Ending {acct.last4}
+                </p>
+                {acct.verified ? (
+                  <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-800">
+                    <BadgeCheck className="h-4 w-4" />
+                    Verified · {acct.verifiedAt ?? "—"}
+                  </p>
+                ) : (
+                  <p className="mt-3 text-sm text-amber-800">
+                    Verification required before the next deposit.
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
           <p className="mt-3 text-sm text-stone-600">
             Review this account before filing to avoid refund delays. Update
             details if your institution or account has changed.

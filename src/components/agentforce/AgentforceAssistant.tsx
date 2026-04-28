@@ -5,17 +5,28 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { Bot, Send, Sparkles, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useTaxpayer360 } from "@/context/Taxpayer360Context";
+import { usePortalNav } from "@/context/PortalNavigationContext";
+import { TAX_FILING_PROACTIVE_AGENT_MESSAGE } from "@/data/taxFiling";
+import { buildAgentOpeningMessages } from "./buildOpeningMessages";
+import type {
+  ChatMsg,
+  ConfirmInstallmentPlanAction,
+  ConfirmPendingPaymentAction,
+} from "./chatTypes";
 import { getAssistantReply } from "./getAssistantReply";
 
 const SUGGESTED_CHIPS = [
-  "What income do you have on file?",
-  "Confirm my last payments",
-  "Explain notice L-123",
-  "Check Refund Status",
+  "Why is my refund on hold?",
+  "Explain Notice L-123",
+  "Break down my balance",
+  "I can't pay this all at once",
+  "Confirm my last three tax payments",
+  "I'd like to pay my $1,000 estimated tax for Q1.",
+  "Check refund status",
+  "Check for notices",
 ] as const;
-
-type Msg = { id: string; role: "user" | "assistant"; text: string };
 
 function formatAssistantText(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -32,34 +43,145 @@ function formatAssistantText(text: string) {
 }
 
 export function AgentforceAssistant() {
+  const { activeNav } = usePortalNav();
+  const {
+    getSnapshot,
+    confirmRefundBankUnchanged,
+    setRefundDestination,
+    appendLedgerPayment,
+    installmentPlan,
+    activateInstallmentPlanFromAgent,
+  } = useTaxpayer360();
+
+  const opening = useMemo(() => buildAgentOpeningMessages(), []);
+  const [messages, setMessages] = useState<ChatMsg[]>(opening);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Msg[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      text: "Hi — I'm your Agentforce assistant. Ask about income on file, payments, notices, or refund status. Answers are mocked for this demo but follow PRD triggers.",
-    },
-  ]);
   const listRef = useRef<HTMLDivElement>(null);
+  const completedPaymentActionIds = useRef(new Set<string>());
+  const completedInstallmentActionIds = useRef(new Set<string>());
+  const [, refreshActionUi] = useReducer((n: number) => n + 1, 0);
+  const prevNavRef = useRef<typeof activeNav | null>(null);
 
-  const send = useCallback((text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    const userMsg: Msg = {
-      id: `u-${Date.now()}`,
-      role: "user",
-      text: trimmed,
-    };
-    const reply = getAssistantReply(trimmed);
-    const botMsg: Msg = {
-      id: `a-${Date.now()}`,
-      role: "assistant",
-      text: reply,
-    };
-    setMessages((m) => [...m, userMsg, botMsg]);
-    setInput("");
-  }, []);
+  useEffect(() => {
+    const prev = prevNavRef.current;
+    prevNavRef.current = activeNav;
+    if (activeNav !== "taxes") return;
+    if (prev === "taxes") return;
+    setMessages((m) => [
+      ...m,
+      {
+        id: `a-proactive-taxes-${Date.now()}`,
+        role: "assistant",
+        text: TAX_FILING_PROACTIVE_AGENT_MESSAGE,
+      },
+    ]);
+  }, [activeNav]);
+
+  const handleConfirmPendingPayment = useCallback(
+    (action: ConfirmPendingPaymentAction) => {
+      if (completedPaymentActionIds.current.has(action.id)) return;
+      completedPaymentActionIds.current.add(action.id);
+      appendLedgerPayment({
+        label: action.ledgerLabel,
+        date: action.paymentDate,
+        dateDisplay: action.dateDisplay,
+        amount: action.amount,
+        quarter: action.quarter,
+        taxYear: action.taxYear,
+        status: action.status,
+        paymentType: action.paymentType,
+      });
+      setMessages((m) => [
+        ...m,
+        {
+          id: `a-post-${Date.now()}`,
+          role: "assistant",
+          text: "**Payment recorded.** Your **Taxes & Filing** history and **Payments & Ledger** now include this payment (demo).",
+        },
+      ]);
+      refreshActionUi();
+    },
+    [appendLedgerPayment],
+  );
+
+  const handleConfirmInstallmentPlan = useCallback(
+    (action: ConfirmInstallmentPlanAction) => {
+      if (completedInstallmentActionIds.current.has(action.id)) return;
+      completedInstallmentActionIds.current.add(action.id);
+      activateInstallmentPlanFromAgent({
+        totalDebt: action.totalDebt,
+        months: action.months,
+        monthlyPayment: action.monthlyPayment,
+        bankAccountId: action.bankAccountId,
+        bankLabel: action.bankLabel,
+      });
+      setMessages((m) => [
+        ...m,
+        {
+          id: `a-installment-${Date.now()}`,
+          role: "assistant",
+          text: "**Installment plan activated.** Your **Payments & Ledger** tab now shows an **active plan**, and the manual installment application path is closed for this session (demo).",
+        },
+      ]);
+      refreshActionUi();
+    },
+    [activateInstallmentPlanFromAgent],
+  );
+
+  const send = useCallback(
+    (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      const q = trimmed.toLowerCase();
+      const ts = Date.now();
+      const userMsg: ChatMsg = {
+        id: `u-${ts}`,
+        role: "user",
+        text: trimmed,
+      };
+
+      if (
+        q.includes("use wells fargo") ||
+        q.includes("wells fargo for refund") ||
+        q.includes("use global savings") ||
+        q.includes("global savings for refund")
+      ) {
+        setRefundDestination("wells-1");
+        const botMsg: ChatMsg = {
+          id: `a-${ts + 1}`,
+          role: "assistant",
+          text: "**Refund destination updated.** Your refund will now go to **Wells Fargo ending in 8842**. **Profile & Household** reflects this immediately in Taxpayer 360.",
+        };
+        setMessages((m) => [...m, userMsg, botMsg]);
+        setInput("");
+        return;
+      }
+
+      if (
+        q === "yes" ||
+        q === "y" ||
+        q === "yes." ||
+        q.includes("yes that's correct") ||
+        q.includes("yes, that's correct") ||
+        q.includes("still correct") ||
+        q.includes("confirm that's correct")
+      ) {
+        confirmRefundBankUnchanged();
+      }
+
+      const reply = getAssistantReply(trimmed, getSnapshot());
+      const botMsg: ChatMsg = {
+        id: `a-${ts + 1}`,
+        role: "assistant",
+        text: reply.text,
+        actions: reply.actions,
+      };
+      setMessages((m) => [...m, userMsg, botMsg]);
+      setInput("");
+    },
+    [getSnapshot, confirmRefundBankUnchanged, setRefundDestination],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -128,9 +250,44 @@ export function AgentforceAssistant() {
                     }`}
                   >
                     {m.role === "assistant" ? (
-                      <p className="whitespace-pre-wrap">
-                        {formatAssistantText(m.text)}
-                      </p>
+                      <div className="space-y-3">
+                        <p className="whitespace-pre-wrap">
+                          {formatAssistantText(m.text)}
+                        </p>
+                        {m.actions?.map((action) => (
+                          <div key={action.id}>
+                            {action.kind === "confirm_pending_payment" ? (
+                              <button
+                                type="button"
+                                disabled={completedPaymentActionIds.current.has(
+                                  action.id,
+                                )}
+                                onClick={() =>
+                                  handleConfirmPendingPayment(action)
+                                }
+                                className="w-full rounded-full bg-portal-ochre px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-portal-ochre-hover disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {action.label}
+                              </button>
+                            ) : action.kind === "confirm_installment_plan" ? (
+                              <button
+                                type="button"
+                                disabled={
+                                  completedInstallmentActionIds.current.has(
+                                    action.id,
+                                  ) || installmentPlan != null
+                                }
+                                onClick={() =>
+                                  handleConfirmInstallmentPlan(action)
+                                }
+                                className="w-full rounded-full bg-portal-brown px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-portal-brown/90 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {action.label}
+                              </button>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
                     ) : (
                       m.text
                     )}

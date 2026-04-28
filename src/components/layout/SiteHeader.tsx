@@ -81,7 +81,7 @@ export function SiteHeader({
                   {TAXPAYER.name}
                 </span>
                 <span className="block truncate text-xs text-stone-500">
-                  TIN {TAXPAYER.tinMasked}
+                  SSN {TAXPAYER.tinMasked}
                 </span>
               </span>
               <ChevronDown className="hidden h-4 w-4 text-stone-400 sm:block" />
@@ -95,7 +95,7 @@ export function SiteHeader({
                 <p className="text-sm font-semibold text-stone-900">
                   {TAXPAYER.name}
                 </p>
-                <p className="text-xs text-stone-500">TIN {TAXPAYER.tinMasked}</p>
+                <p className="text-xs text-stone-500">SSN {TAXPAYER.tinMasked}</p>
               </div>
               <MenuItem>
                 <button
@@ -202,7 +202,7 @@ export function SiteHeader({
               <button
                 type="button"
                 onClick={() => {
-                  onNavigate("dashboard");
+                  onNavigate("home");
                   clearSecondary();
                 }}
                 className="font-medium hover:underline"
