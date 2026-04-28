@@ -30,7 +30,7 @@ export function Sidebar({ active, onNavigate, className = "" }: SidebarProps) {
     >
       <div className="flex items-center gap-2.5 border-b border-stone-100 px-4 py-4">
         <img
-          src="/portal-logo.png"
+          src={`${import.meta.env.BASE_URL}portal-logo.png`}
           alt=""
           width={40}
           height={40}

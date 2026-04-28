@@ -8,10 +8,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** Set when running `npm run build:github-pages` — publishes static files to /docs for GitHub Pages. */
 const githubPages = process.env.GITHUB_PAGES === "true";
-/** Project-site root path (repo name). Override for your host, e.g. `VITE_PAGES_BASE=/my-repo/ npm run build:github-pages` */
+/**
+ * Pages asset prefix. Default `./` so JS/CSS resolve under whatever path GitHub
+ * Enterprise serves (e.g. /pages/org/repo/). Override if you use a fixed path:
+ * `VITE_PAGES_BASE=/pss-264-tax-revenue-v1/ npm run build:github-pages`
+ */
 const pagesBase =
   process.env.VITE_PAGES_BASE?.replace(/\/?$/, "/") ??
-  (githubPages ? "/pss-264-tax-revenue-v1/" : "/");
+  (githubPages ? "./" : "/");
 
 export default defineConfig({
   base: githubPages ? pagesBase : "/",

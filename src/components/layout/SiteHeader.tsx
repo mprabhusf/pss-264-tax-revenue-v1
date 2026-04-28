@@ -38,7 +38,7 @@ export function SiteHeader({
 
         <div className="flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3">
           <img
-            src="/portal-logo.png"
+            src={`${import.meta.env.BASE_URL}portal-logo.png`}
             alt=""
             width={40}
             height={40}
