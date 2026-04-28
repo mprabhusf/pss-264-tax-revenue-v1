@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "build:github-pages": "tsc --noEmit && GITHUB_PAGES=true vite build && node -e \"require('fs').writeFileSync('docs/.nojekyll','')\"",
     "preview": "vite preview",
     "start": "node server.mjs",
     "heroku-postbuild": "npm run build"
