@@ -32,12 +32,13 @@ jobs:
           node-version: "22"
           cache: npm
 
+      - uses: actions/configure-pages@v5
+
       - name: Install and build for Pages
         run: npm ci && npm run build:github-pages
         env:
           GITHUB_PAGES: "true"
-
-      - uses: actions/configure-pages@v5
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

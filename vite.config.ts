@@ -9,10 +9,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 /** Set when running `npm run build:github-pages` — publishes static files to /docs for GitHub Pages. */
 const githubPages = process.env.GITHUB_PAGES === "true";
 
-/** GitHub project Pages are served at /repository-name/; relative `./` breaks when the URL has no trailing slash. */
+/** GitHub project Pages are served at /repository-name/ (path segment is lowercase in URLs). */
 function defaultGithubPagesBase(): string {
   const repo = process.env.GITHUB_REPOSITORY?.split("/")[1];
-  if (repo) return `/${repo}/`;
+  if (repo) return `/${repo.toLowerCase()}/`;
   return "/pss-264-tax-revenue-v1/";
 }
 
