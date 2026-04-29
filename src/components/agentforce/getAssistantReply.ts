@@ -384,7 +384,7 @@ export function getAssistantReply(
           label +
           "**.",
         "",
-        "Say **I'd like to pay my $1,000 estimated tax for Q1** for the in-chat **Confirm Payment** flow, or reply **confirm payment** to post a demo row.",
+        "You can complete **2025 Q1 estimated tax** from **Payments & Ledger** (Make a payment), or reply **confirm payment** in chat to post a demo row after you’ve chosen amount and bank.",
         "",
         "_Grounded from your payment preferences and ledger._",
       ].join("\n"),

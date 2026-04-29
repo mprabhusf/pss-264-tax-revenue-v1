@@ -18,12 +18,7 @@ import type {
 import { getAssistantReply } from "./getAssistantReply";
 
 const SUGGESTED_CHIPS = [
-  "Why is my refund on hold?",
-  "Explain Notice L-123",
   "Break down my balance",
-  "I can't pay this all at once",
-  "Confirm my last three tax payments",
-  "I'd like to pay my $1,000 estimated tax for Q1.",
   "Check refund status",
   "Check for notices",
 ] as const;
